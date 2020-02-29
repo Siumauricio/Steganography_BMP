@@ -122,7 +122,7 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename) {
                 getLastIndex(B);
               Colores24.push_back (Pixel);
 
-               if(col==8){
+               if(col==12){
                    int can=0;
                    for (int i = 8; i <Cadena.size(); i+=8) {
                        string a(&Cadena[can], &Cadena[i]);
@@ -135,7 +135,7 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename) {
             }
             File.seekg(InfoHeader.Anchura % 4, std::ios::cur);
         }
-    //EncryptMessage(Filename,"A O");
+   // EncryptMessage(Filename,"HOLA");
 
 
 
@@ -201,8 +201,15 @@ void Bitmap::EncryptMessage(string path,string texto)  {
                 File2.write(reinterpret_cast<char*>(&R_),1);
 
             }else{
-                cout<<"FInal "<<posCadena<<endl;
-                return;
+                if((posV)<cadenas.size()){
+                    posCadena=0;
+                    Swap_RGB_String_R(R,cadenas[++posV]);
+                    int R_=( int) getDecimalFromBinary(R);
+                    File2.write(reinterpret_cast<char*>(&R_),1);
+                }else{
+                    return;
+                }
+
             }
             if(posCadena!=8){
                 Swap_RGB_String_G(G,cadenas[posV]);
@@ -210,11 +217,16 @@ void Bitmap::EncryptMessage(string path,string texto)  {
                 File2.seekp(Header.OffsetData+(++contador),File2.beg);
                 File2.write(reinterpret_cast<char*>(&G_),1);
             }else{
-                posCadena=0;
-                Swap_RGB_String_G(G,cadenas[++posV]);
-                int G_=( int) getDecimalFromBinary(G);
-                File2.seekp(Header.OffsetData+(++contador),File2.beg);
-                File2.write(reinterpret_cast<char*>(&G_),1);
+                if((posV)<cadenas.size()) {
+                    posCadena = 0;
+                    Swap_RGB_String_G(G,cadenas[++posV]);
+                    int G_=( int) getDecimalFromBinary(G);
+                    File2.seekp(Header.OffsetData+(++contador),File2.beg);
+                    File2.write(reinterpret_cast<char*>(&G_),1);
+                }else{
+                    return;
+                }
+
             }
 
             if(posCadena!=8){
@@ -224,12 +236,18 @@ void Bitmap::EncryptMessage(string path,string texto)  {
                 File2.write(reinterpret_cast<char*>(&B_),1);
                 File2.seekp(Header.OffsetData+(++contador),File2.beg);
             }else{
-                posCadena=0;
-                Swap_RGB_String_B(B,cadenas[++posV]);
-                int B_=( int) getDecimalFromBinary(B);
-                File2.seekp(Header.OffsetData+(++contador),File2.beg);
-                File2.write(reinterpret_cast<char*>(&B_),1);
-                File2.seekp(Header.OffsetData+(++contador),File2.beg);
+                if((posV+1)<cadenas.size()) {
+                    posCadena = 0;
+                    Swap_RGB_String_B(B,cadenas[++posV]);
+                    int B_=( int) getDecimalFromBinary(B);
+                    File2.seekp(Header.OffsetData+(++contador),File2.beg);
+                    File2.write(reinterpret_cast<char*>(&B_),1);
+                    File2.seekp(Header.OffsetData+(++contador),File2.beg);
+
+                }else{
+                    return;
+                }
+
                 //return;
             }
             i++;
