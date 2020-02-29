@@ -107,64 +107,38 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename) {
     cout << "+ Colores U: " << InfoHeader.Colores_Usados << endl;
     cout << "+ Colores I: " << InfoHeader.Colores_Importantes << endl;
     File.seekg (Header.OffsetData, File.beg);
-    ofstream File2(Filename, ifstream::in | ifstream::binary);
-    File2.seekp(Header.OffsetData, File.beg);
-    int contador=0;
-    int posV=0;
-    vector<string>cadenas=stringtoBinary("AO");
+
     cout<<"\n";
+
         for (int row = 0; row < InfoHeader.Altura; row++){
             for (int col = 0; col < InfoHeader.Anchura; col++) {
                 RGB24B  Pixel;
                 File.read (reinterpret_cast<char*>(&Pixel), sizeof (RGB24B));
-               Colores24.push_back (Pixel);
+                string R=decimaltoBinary((int)Pixel.r);
+                string G=decimaltoBinary((int)Pixel.g);
+                string B=decimaltoBinary((int)Pixel.b);
+                getLastIndex(R);
+                getLastIndex(G);
+                getLastIndex(B);
+              Colores24.push_back (Pixel);
+
+               if(col==8){
+                   int can=0;
+                   for (int i = 8; i <Cadena.size(); i+=8) {
+                       string a(&Cadena[can], &Cadena[i]);
+                       getTextFromBinary(a);
+                       can+=8;
+                   }
+
+                   return;
+               }
             }
             File.seekg(InfoHeader.Anchura % 4, std::ios::cur);
         }
-        int i=0;
+    //EncryptMessage(Filename,"A O");
 
-    for (int row = 0; row < InfoHeader.Altura; row++){
-        for (int col = 0; col < InfoHeader.Anchura; col++) {
-            string R=decimaltoBinary((int)Colores24[i].r);
-            string G=decimaltoBinary((int)Colores24[i].g);
-            string B=decimaltoBinary((int)Colores24[i].b);
 
-            if(posCadena!=8){
-                Swap_RGB_String_R(R,cadenas[posV]);
-                int R_=( int) getDecimalFromBinary(R);
-                File2.write(reinterpret_cast<char*>(&R_),1);
 
-            }
-            if(posCadena!=8){
-                Swap_RGB_String_G(G,cadenas[posV]);
-
-                int G_=( int) getDecimalFromBinary(G);
-                File2.seekp(Header.OffsetData+(++contador),File.beg);
-                File2.write(reinterpret_cast<char*>(&G_),1);
-            }else{
-                cout<<"FInal "<<posCadena<<endl;
-                return;
-            }
-
-            if(posCadena!=8){
-                Swap_RGB_String_B(B,cadenas[posV]);
-                int B_=( int) getDecimalFromBinary(B);
-                File2.seekp(Header.OffsetData+(++contador),File.beg);
-                File2.write(reinterpret_cast<char*>(&B_),1);
-                File2.seekp(Header.OffsetData+(++contador),File.beg);
-            }else{
-                posCadena=0;
-                Swap_RGB_String_B(B,cadenas[++posV]);
-                int B_=( int) getDecimalFromBinary(B);
-                File2.seekp(Header.OffsetData+(++contador),File.beg);
-                File2.write(reinterpret_cast<char*>(&B_),1);
-                File2.seekp(Header.OffsetData+(++contador),File.beg);
-                //return;
-            }
-            i++;
-        }
-        i++;
-        }
 
     File.close ();
 }
@@ -208,42 +182,91 @@ void Bitmap::Swap_RGB_String_B(string &B, string palabra) {
     B[B.length()-1]=palabra.at(posCadena++);
 }
 
+void Bitmap::EncryptMessage(string path,string texto)  {
+    vector<string>cadenas=stringtoBinary(texto);
+    int contador=0;
+    int posV=0;
+    int i=0;
+    ofstream File2(path, ifstream::in | ifstream::binary);
+    File2.seekp(Header.OffsetData, File2.beg);
+    for (int row = 0; row < InfoHeader.Altura; row++){
+        for (int col = 0; col < InfoHeader.Anchura; col++) {
+            string R=decimaltoBinary((int)Colores24[i].r);
+            string G=decimaltoBinary((int)Colores24[i].g);
+            string B=decimaltoBinary((int)Colores24[i].b);
+
+            if(posCadena!=8){
+                Swap_RGB_String_R(R,cadenas[posV]);
+                int R_=( int) getDecimalFromBinary(R);
+                File2.write(reinterpret_cast<char*>(&R_),1);
+
+            }else{
+                cout<<"FInal "<<posCadena<<endl;
+                return;
+            }
+            if(posCadena!=8){
+                Swap_RGB_String_G(G,cadenas[posV]);
+                int G_=( int) getDecimalFromBinary(G);
+                File2.seekp(Header.OffsetData+(++contador),File2.beg);
+                File2.write(reinterpret_cast<char*>(&G_),1);
+            }else{
+                posCadena=0;
+                Swap_RGB_String_G(G,cadenas[++posV]);
+                int G_=( int) getDecimalFromBinary(G);
+                File2.seekp(Header.OffsetData+(++contador),File2.beg);
+                File2.write(reinterpret_cast<char*>(&G_),1);
+            }
+
+            if(posCadena!=8){
+                Swap_RGB_String_B(B,cadenas[posV]);
+                int B_=( int) getDecimalFromBinary(B);
+                File2.seekp(Header.OffsetData+(++contador),File2.beg);
+                File2.write(reinterpret_cast<char*>(&B_),1);
+                File2.seekp(Header.OffsetData+(++contador),File2.beg);
+            }else{
+                posCadena=0;
+                Swap_RGB_String_B(B,cadenas[++posV]);
+                int B_=( int) getDecimalFromBinary(B);
+                File2.seekp(Header.OffsetData+(++contador),File2.beg);
+                File2.write(reinterpret_cast<char*>(&B_),1);
+                File2.seekp(Header.OffsetData+(++contador),File2.beg);
+                //return;
+            }
+            i++;
+        }
+    }
+    File2.close();
+}
+
+void Bitmap::DecryptMessage(string Filename) {
+    ifstream File;
+    File.open (Filename, ifstream::in | ifstream::binary);
+    if (File.fail ()) {
+        return;
+    }
+    File.seekg (Header.OffsetData, File.beg);
 
 
-/*
-                cout<<(int)Pixel.r<<" "<<(int)Pixel.g<<" "<<(int)Pixel.b<<endl;
+}
 
-                string R=decimaltoBinary((int)Pixel.r);
-                string G=decimaltoBinary((int)Pixel.g);
-                string B=decimaltoBinary((int)Pixel.b);
+void Bitmap::getLastIndex(string data) {
+      std::bitset<8> bits(data[data.length()-1]);
+      Cadena.push_back(char(bits.to_ullong()));
+}
+
+void Bitmap::getTextFromBinary(string data) {
+    std::stringstream sstream(data);
+    std::string output;
+    while(sstream.good())
+    {
+        std::bitset<8> bits;
+        sstream >> bits;
+        char c = char(bits.to_ulong());
+        output += c;
 
 
-
-                if(posCadena!=8){
-                    cout<<File2.tellp()<<endl;
-
-                    Swap_RGB_String_R(R,cadenas[posV]);
-                    int R_=( int) getDecimalFromBinary(R);
-                    cout<<R_<<endl;
-                    File2.write(reinterpret_cast<char*>(&R_),1);
-
-                }
-                if(posCadena!=8){
-                    Swap_RGB_String_G(G,cadenas[posV]);
-
-                    int G_=( int) getDecimalFromBinary(G);
-                    File2.seekp(Header.OffsetData+(++contador),File.beg);
-
-                    File2.write(reinterpret_cast<char*>(&G_),1);
-
-                }
-
-                if(posCadena!=8){
-                    Swap_RGB_String_B(B,cadenas[posV]);
-                    int B_=( int) getDecimalFromBinary(B);
-                    File2.seekp(Header.OffsetData+(++contador),File.beg);
-                    File2.write(reinterpret_cast<char*>(&B_),1);
-                    File2.seekp(Header.OffsetData+(++contador),File.beg);
-                }else{
-                    return;
-                }*/
+    }
+    for (int i = 0; i <data.length()-7 ; ++i) {
+        cout<<output[i];
+    }
+}
