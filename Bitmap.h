@@ -54,16 +54,22 @@ public:
     void ObtenerBmp_InfoHeader (string);
 
     vector<RGB24B>Colores24;
+    vector<char>Cadena;
     int posCadena=0;
     string decimaltoBinary(int);
     vector<string> stringtoBinary(string);
     void Swap_RGB_String_R(string&,string);
     void Swap_RGB_String_G(string&,string);
+
     void Swap_RGB_String_B(string&,string);
     uint8_t getDecimalFromBinary(string);
+
+    void getLastIndex(string);
+    void getTextFromBinary(string);
+    void EncryptMessage(string,string);
+    void DecryptMessage(string);
 
 
     int getTipo();
 };
 #endif // !BITMAP_H
-
