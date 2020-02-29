@@ -122,7 +122,7 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename) {
                 getLastIndex(B);
               Colores24.push_back (Pixel);
 
-               if(col==12){
+               if(col==55){
                    int can=0;
                    for (int i = 8; i <Cadena.size(); i+=8) {
                        string a(&Cadena[can], &Cadena[i]);
@@ -135,10 +135,7 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename) {
             }
             File.seekg(InfoHeader.Anchura % 4, std::ios::cur);
         }
-   // EncryptMessage(Filename,"HOLA");
-
-
-
+//EncryptMessage(Filename,"HOLA PUTO ENCRYPTADO");
 
     File.close ();
 }
@@ -201,7 +198,7 @@ void Bitmap::EncryptMessage(string path,string texto)  {
                 File2.write(reinterpret_cast<char*>(&R_),1);
 
             }else{
-                if((posV)<cadenas.size()){
+                if((posV+1)<cadenas.size()){
                     posCadena=0;
                     Swap_RGB_String_R(R,cadenas[++posV]);
                     int R_=( int) getDecimalFromBinary(R);
@@ -217,7 +214,7 @@ void Bitmap::EncryptMessage(string path,string texto)  {
                 File2.seekp(Header.OffsetData+(++contador),File2.beg);
                 File2.write(reinterpret_cast<char*>(&G_),1);
             }else{
-                if((posV)<cadenas.size()) {
+                if((posV+1)<cadenas.size()) {
                     posCadena = 0;
                     Swap_RGB_String_G(G,cadenas[++posV]);
                     int G_=( int) getDecimalFromBinary(G);
