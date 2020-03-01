@@ -1,287 +1,68 @@
-//
-// Created by siumauricio on 28/2/20.
-
-
-#include "Bitmap.h"
-#include <fstream>
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <dirent.h>
-#include <string.h>
-#include <sstream>
-#include <stdlib.h>
-
-#include <bitset>
-
-#include <stdio.h>
+#pragma once
+#ifndef BMP_H
+#define BMP_H
+#include <vector>
 using namespace std;
+#include <string>
+#include <iostream>
 
-Bitmap::Bitmap () {}
+#pragma pack(push,1)
+class BMP_Header {
+public:
+    char Tipo[2];
+    int Tamano;
+    int Reservado;
+    int OffsetData;
+};
+#pragma pack(pop)
 
-Bitmap::Bitmap (string Filename) {
-    cout<<"\n";
-    ObtenerBmp_Header(Filename);
-    ObtenerBmp_InfoHeader(Filename);
-}
+#pragma pack(push,1)
+class BMP_InfoHeader {
+public:
+    int Tamano;
+    int Anchura;
+    int Altura;
+    char Planes[2];
+    char ContadorBits[2];
+    int Compresion;
+    int TamanoImagen;
+    int Pixeles_X;
+    int Pixeles_Y;
+    int Colores_Usados;
+    int Colores_Importantes;
+};
+#pragma pack(pop)
 
-void Bitmap::ObtenerBmp_Header (string Filename) {
-    ifstream File;
-    File.open (Filename, ifstream::in | ifstream::binary);
-    if (File.fail ()) {
-        return;
-    }
-    char* Header_Posiciones = new char[sizeof (BMP_Header)];
-    File.read (Header_Posiciones, sizeof (BMP_Header));
-    char informacion[4];
+struct RGB24B {
+    uint8_t r, g, b;
+};
+class Bitmap {
+public:
+    BMP_Header Header;
+    BMP_InfoHeader InfoHeader;
+    Bitmap ();
+    Bitmap (string,int);
+    void ObtenerBmp_Header (string);
+    void ObtenerBmp_InfoHeader (string,int);
 
-    copy (Header_Posiciones + 0, Header_Posiciones + 2, informacion);
-    memcpy (&Header.Tipo, informacion, 2);
+    vector<RGB24B>Colores24;
+    vector<char>Cadena;
+    int posCadena = 0;
+    int posTexto = 0;
+    string decimaltoBinary (int);
+    vector<string> stringtoBinary (string);
+    void Swap_RGB_String_R (string&, string);
+    void Swap_RGB_String_G (string&, string);
 
-    copy (Header_Posiciones + 2, Header_Posiciones + 6, informacion);
-    memcpy (&Header.Tamano, informacion, 4);
+    void Swap_RGB_String_B (string&, string);
+    uint8_t getDecimalFromBinary (string);
 
-    copy (Header_Posiciones + 10, Header_Posiciones + 14, informacion);
-    memcpy (&Header.OffsetData, informacion, 4);
-
-    cout << "==== BMP HEADER ====" << endl;
-    cout << "+ Tipo: " << Header.Tipo[0] << Header.Tipo[1] << endl;
-    cout << "+ Tamano Archivo: " << Header.Tamano << endl;
-    cout << "+ Espacio Reservado: " << sizeof (Header.Reservado) << endl;
-    cout << "+ DataOffset: " << Header.OffsetData << endl;
-
-    cout << endl;
-    File.close ();
-}
-
-void Bitmap::ObtenerBmp_InfoHeader (string Filename) {
-    ifstream File;
-    File.open (Filename, ifstream::in | ifstream::binary);
-    if (File.fail ()) {
-        return;
-    }
-    char* Info_Posiciones = new char[sizeof (BMP_InfoHeader) + sizeof (BMP_Header)];
-    File.read (Info_Posiciones, sizeof (BMP_InfoHeader) + sizeof (BMP_Header));
-    char informacion[4];
-
-    copy (Info_Posiciones + 18, Info_Posiciones + 22, informacion);
-    memcpy (&InfoHeader.Anchura, informacion, 4);
-
-    copy (Info_Posiciones + 22, Info_Posiciones + 26, informacion);
-    memcpy (&InfoHeader.Altura, informacion, 4);
-
-    copy (Info_Posiciones + 26, Info_Posiciones + 28, informacion);
-    memcpy (&InfoHeader.Planes, informacion, 2);
-
-    copy (Info_Posiciones + 28, Info_Posiciones + 30, informacion);
-    memcpy (&InfoHeader.ContadorBits, informacion, 2);
-
-    copy (Info_Posiciones + 30, Info_Posiciones + 34, informacion);
-    memcpy (&InfoHeader.Compresion, informacion, 4);
-
-    copy (Info_Posiciones + 34, Info_Posiciones + 38, informacion);
-    memcpy (&InfoHeader.TamanoImagen, informacion, 4);
-
-    copy (Info_Posiciones + 38, Info_Posiciones + 42, informacion);
-    memcpy (&InfoHeader.Pixeles_X, informacion, 4);
-
-    copy (Info_Posiciones + 42, Info_Posiciones + 46, informacion);
-    memcpy (&InfoHeader.Pixeles_Y, informacion, 4);
-
-    copy (Info_Posiciones + 46, Info_Posiciones + 50, informacion);
-    memcpy (&InfoHeader.Colores_Usados, informacion, 4);
-
-    copy (Info_Posiciones + 50, Info_Posiciones + 54, informacion);
-    memcpy (&InfoHeader.Colores_Importantes, informacion, 4);
-
-    cout << "==== BMP INFOHEADER ====" << endl;
-    cout << "+ Tamano: " << 40<< endl;
-    cout << "+ Anchura: " << InfoHeader.Anchura << endl;
-    cout << "+ Altura: " << InfoHeader.Altura << endl;
-    cout << "+ Planos: " << (int)InfoHeader.Planes[0] << endl;
-    cout << "+ Contador Bits: " << (int)InfoHeader.ContadorBits[0] << endl;
-    cout << "+ Compresion: " << InfoHeader.Compresion << endl;
-    cout << "+ Tamano Imagen: " << InfoHeader.TamanoImagen << endl;
-    cout << "+ Pixel X: " << InfoHeader.Pixeles_X << endl;
-    cout << "+ Pixel Y: " << InfoHeader.Pixeles_Y << endl;
-    cout << "+ Colores U: " << InfoHeader.Colores_Usados << endl;
-    cout << "+ Colores I: " << InfoHeader.Colores_Importantes << endl;
-    File.seekg (Header.OffsetData, File.beg);
-
-    cout<<"\n";
-
-        for (int row = 0; row < InfoHeader.Altura; row++){
-            for (int col = 0; col < InfoHeader.Anchura; col++) {
-                RGB24B  Pixel;
-                File.read (reinterpret_cast<char*>(&Pixel), sizeof (RGB24B));
-                string R=decimaltoBinary((int)Pixel.r);
-                string G=decimaltoBinary((int)Pixel.g);
-                string B=decimaltoBinary((int)Pixel.b);
-                getLastIndex(R);
-                getLastIndex(G);
-                getLastIndex(B);
-              Colores24.push_back (Pixel);
-
-               if(col==55){
-                   int can=0;
-                   for (int i = 8; i <Cadena.size(); i+=8) {
-                       string a(&Cadena[can], &Cadena[i]);
-                       getTextFromBinary(a);
-                       can+=8;
-                   }
-
-                   return;
-               }
-            }
-            File.seekg(InfoHeader.Anchura % 4, std::ios::cur);
-        }
-//EncryptMessage(Filename,"HOLA PUTO ENCRYPTADO");
-
-    File.close ();
-}
-
-string Bitmap::decimaltoBinary(int decimal){
-    std::bitset<8> bin_x(decimal);
-    string digito=bin_x.to_string();
-    return digito;
-}
-
-int Bitmap::getTipo() {
-    int bit = InfoHeader.ContadorBits[0];
-    return bit;
-}
-
-vector<string> Bitmap::stringtoBinary(string myString) {
-    vector<string>palabras;
-    for (std::size_t i = 0; i < myString.size(); ++i)
-    {
-        palabras.push_back(bitset<8>(myString[i]).to_string());
-    }
-    return palabras;
-}
+    void getLastIndex (string);
+    string getTextFromBinary (string);
+    void EncryptMessage (string, string);
+    void DecryptMessage ();
 
 
-
-uint8_t Bitmap::getDecimalFromBinary(string s) {
-    std::bitset<sizeof(int) * 8> b(s);
-    uint8_t x=b.to_ulong() ;
-    return (int)x;
-}
-
-void Bitmap::Swap_RGB_String_R(string &R,string palabra) {
-    R[R.length()-1]=palabra.at(posCadena++);
-}
-
-void Bitmap::Swap_RGB_String_G(string & G, string palabra) {
-    G[G.length()-1]=palabra.at(posCadena++);
-}
-void Bitmap::Swap_RGB_String_B(string &B, string palabra) {
-    B[B.length()-1]=palabra.at(posCadena++);
-}
-
-void Bitmap::EncryptMessage(string path,string texto)  {
-    vector<string>cadenas=stringtoBinary(texto);
-    int contador=0;
-    int posV=0;
-    int i=0;
-    ofstream File2(path, ifstream::in | ifstream::binary);
-    File2.seekp(Header.OffsetData, File2.beg);
-    for (int row = 0; row < InfoHeader.Altura; row++){
-        for (int col = 0; col < InfoHeader.Anchura; col++) {
-            string R=decimaltoBinary((int)Colores24[i].r);
-            string G=decimaltoBinary((int)Colores24[i].g);
-            string B=decimaltoBinary((int)Colores24[i].b);
-
-            if(posCadena!=8){
-                Swap_RGB_String_R(R,cadenas[posV]);
-                int R_=( int) getDecimalFromBinary(R);
-                File2.write(reinterpret_cast<char*>(&R_),1);
-
-            }else{
-                if((posV+1)<cadenas.size()){
-                    posCadena=0;
-                    Swap_RGB_String_R(R,cadenas[++posV]);
-                    int R_=( int) getDecimalFromBinary(R);
-                    File2.write(reinterpret_cast<char*>(&R_),1);
-                }else{
-                    return;
-                }
-
-            }
-            if(posCadena!=8){
-                Swap_RGB_String_G(G,cadenas[posV]);
-                int G_=( int) getDecimalFromBinary(G);
-                File2.seekp(Header.OffsetData+(++contador),File2.beg);
-                File2.write(reinterpret_cast<char*>(&G_),1);
-            }else{
-                if((posV+1)<cadenas.size()) {
-                    posCadena = 0;
-                    Swap_RGB_String_G(G,cadenas[++posV]);
-                    int G_=( int) getDecimalFromBinary(G);
-                    File2.seekp(Header.OffsetData+(++contador),File2.beg);
-                    File2.write(reinterpret_cast<char*>(&G_),1);
-                }else{
-                    return;
-                }
-
-            }
-
-            if(posCadena!=8){
-                Swap_RGB_String_B(B,cadenas[posV]);
-                int B_=( int) getDecimalFromBinary(B);
-                File2.seekp(Header.OffsetData+(++contador),File2.beg);
-                File2.write(reinterpret_cast<char*>(&B_),1);
-                File2.seekp(Header.OffsetData+(++contador),File2.beg);
-            }else{
-                if((posV+1)<cadenas.size()) {
-                    posCadena = 0;
-                    Swap_RGB_String_B(B,cadenas[++posV]);
-                    int B_=( int) getDecimalFromBinary(B);
-                    File2.seekp(Header.OffsetData+(++contador),File2.beg);
-                    File2.write(reinterpret_cast<char*>(&B_),1);
-                    File2.seekp(Header.OffsetData+(++contador),File2.beg);
-
-                }else{
-                    return;
-                }
-
-                //return;
-            }
-            i++;
-        }
-    }
-    File2.close();
-}
-
-void Bitmap::DecryptMessage(string Filename) {
-    ifstream File;
-    File.open (Filename, ifstream::in | ifstream::binary);
-    if (File.fail ()) {
-        return;
-    }
-    File.seekg (Header.OffsetData, File.beg);
-
-
-}
-
-void Bitmap::getLastIndex(string data) {
-      std::bitset<8> bits(data[data.length()-1]);
-      Cadena.push_back(char(bits.to_ullong()));
-}
-
-void Bitmap::getTextFromBinary(string data) {
-    std::stringstream sstream(data);
-    std::string output;
-    while(sstream.good())
-    {
-        std::bitset<8> bits;
-        sstream >> bits;
-        char c = char(bits.to_ulong());
-        output += c;
-
-
-    }
-    for (int i = 0; i <data.length()-7 ; ++i) {
-        cout<<output[i];
-    }
-}
+    int getTipo ();
+};
+#endif // !BITMAP_H
