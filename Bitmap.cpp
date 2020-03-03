@@ -11,14 +11,13 @@
 #include <bitset>
 
 #include <stdio.h>
-using namespace std;
 
 Bitmap::Bitmap () {}
 
-Bitmap::Bitmap (string Filename,int opcion) {
-    cout << "\n";
-    ObtenerBmp_Header (Filename);
-    ObtenerBmp_InfoHeader (Filename,opcion);
+Bitmap::Bitmap (string Filename,string txt,int opcion) {
+    string Path="//home//siumauricio//Escritorio//Imagenes//"+Filename;
+    ObtenerBmp_Header (Path);
+    ObtenerBmp_InfoHeader (Path,txt,opcion);
 }
 
 void Bitmap::ObtenerBmp_Header (string Filename) {
@@ -42,18 +41,18 @@ void Bitmap::ObtenerBmp_Header (string Filename) {
 
     copy (Header_Posiciones + 10, Header_Posiciones + 14, informacion);
     memcpy (&Header.OffsetData, informacion, 4);
-
+/*
     cout << "==== BMP HEADER ====" << endl;
     cout << "+ Tipo: " << Header.Tipo[0] << Header.Tipo[1] << endl;
     cout << "+ Tamano Archivo: " << Header.Tamano << endl;
     cout << "+ Espacio Reservado: " << (Header.Reservado) << endl;
     cout << "+ DataOffset: " << Header.OffsetData << endl;
-
+*/
     cout << endl;
     File.close ();
 }
 
-void Bitmap::ObtenerBmp_InfoHeader (string Filename,int opcion) {
+void Bitmap::ObtenerBmp_InfoHeader (string Filename,string txt,int opcion) {
     ifstream File;
     File.open (Filename, ifstream::in | ifstream::binary);
     if (File.fail ()) {
@@ -92,7 +91,7 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename,int opcion) {
 
     copy (Info_Posiciones + 50, Info_Posiciones + 54, informacion);
     memcpy (&InfoHeader.Colores_Importantes, informacion, 4);
-
+/*
     cout << "==== BMP INFOHEADER ====" << endl;
     cout << "+ Tamano: " << 40 << endl;
     cout << "+ Anchura: " << InfoHeader.Anchura << endl;
@@ -104,7 +103,7 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename,int opcion) {
     cout << "+ Pixel X: " << InfoHeader.Pixeles_X << endl;
     cout << "+ Pixel Y: " << InfoHeader.Pixeles_Y << endl;
     cout << "+ Colores U: " << InfoHeader.Colores_Usados << endl;
-    cout << "+ Colores I: " << InfoHeader.Colores_Importantes << endl;
+    cout << "+ Colores I: " << InfoHeader.Colores_Importantes << endl;*/
     File.seekg (Header.OffsetData, File.beg);
 
     cout << "\n";
@@ -118,8 +117,8 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename,int opcion) {
             File.seekg (InfoHeader.Anchura % 4, std::ios::cur);
 
         }
-        
-        EncryptMessage (Filename, getTexto());
+
+        EncryptMessage (Filename,txt);
         cout << "Su texto ha sido Encryptado Correctamente....!" << endl;
 
     }else{
@@ -184,7 +183,7 @@ void Bitmap::Swap_RGB_String_B (string& B, string palabra) {
 }
 
 void Bitmap::EncryptMessage (string path, string texto) {
-    /*
+
     if ((InfoHeader.Anchura*8)<=texto.length()) {
         cout << "No hay suficientes pixeles para representar su mensaje completo" << endl;
         cout << "Elimine: " << (double)texto.length () - ((InfoHeader.Altura * InfoHeader.Anchura) / 8) << " Caracteres" << endl;
@@ -192,7 +191,7 @@ void Bitmap::EncryptMessage (string path, string texto) {
         double div1 = ((InfoHeader.Altura * InfoHeader.Anchura) / 8);
         cout << "Se necesita una imagen de " << total_pixels / div1 << " total pixeles para representar su mensaje completamente" << endl;
         return;
-    }*/
+    }
 
     int canT = texto.length ();
     vector<string>cadenas = stringtoBinary (texto);
@@ -289,7 +288,7 @@ void Bitmap::DecryptMessage () {
 string Bitmap::getTexto () {
     string cadena;
     string txt;
-    ifstream a ("test.txt", ios::app);
+    ifstream a ("//home//siumauricio//Escritorio//test.txt", ios::app);
     while (!a.eof()) {
         getline (a, cadena);
         txt += cadena;
