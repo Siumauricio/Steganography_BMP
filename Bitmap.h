@@ -4,6 +4,7 @@
 #include <vector>
 using namespace std;
 #include <string>
+#include <inttypes.h>
 #include <iostream>
 
 #pragma pack(push,1)
@@ -41,9 +42,9 @@ public:
     BMP_Header Header;
     BMP_InfoHeader InfoHeader;
     Bitmap ();
-    Bitmap (string,int);
+    Bitmap (string,string,int);
     void ObtenerBmp_Header (string);
-    void ObtenerBmp_InfoHeader (string,int);
+    void ObtenerBmp_InfoHeader (string,string,int);
 
     vector<RGB24B>Colores24;
     vector<char>Cadena;
