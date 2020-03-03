@@ -1,3 +1,4 @@
+#pragma once
 #ifndef BMP_H
 #define BMP_H
 #include <vector>
@@ -33,43 +34,35 @@ public:
 #pragma pack(pop)
 
 struct RGB24B {
-    uint8_t r,g,b;
+    uint8_t r, g, b;
 };
-
-struct RGB16B {
-    uint8_t r,g,b;
-};
-
-struct RGB8B {
-    uint8_t r,g,b,t;
-};
-class Bitmap
-{
+class Bitmap {
 public:
     BMP_Header Header;
     BMP_InfoHeader InfoHeader;
     Bitmap ();
-    Bitmap (string);
-    void ObtenerBmp_Header(string);
-    void ObtenerBmp_InfoHeader (string);
+    Bitmap (string,int);
+    void ObtenerBmp_Header (string);
+    void ObtenerBmp_InfoHeader (string,int);
 
     vector<RGB24B>Colores24;
     vector<char>Cadena;
-    int posCadena=0;
-    string decimaltoBinary(int);
-    vector<string> stringtoBinary(string);
-    void Swap_RGB_String_R(string&,string);
-    void Swap_RGB_String_G(string&,string);
+    int posCadena = 0;
+    int posTexto = 0;
+    string decimaltoBinary (int);
+    vector<string> stringtoBinary (string);
+    void Swap_RGB_String_R (string&, string);
+    void Swap_RGB_String_G (string&, string);
 
-    void Swap_RGB_String_B(string&,string);
-    uint8_t getDecimalFromBinary(string);
+    void Swap_RGB_String_B (string&, string);
+    uint8_t getDecimalFromBinary (string);
 
-    void getLastIndex(string);
-    void getTextFromBinary(string);
-    void EncryptMessage(string,string);
-    void DecryptMessage(string);
+    void getLastIndex (string);
+    string getTextFromBinary (string);
+    void EncryptMessage (string, string);
+    void DecryptMessage ();
+    string getTexto ();
 
-
-    int getTipo();
+    int getTipo ();
 };
 #endif // !BITMAP_H
