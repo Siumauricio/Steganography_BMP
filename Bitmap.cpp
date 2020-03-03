@@ -118,8 +118,10 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename,int opcion) {
             File.seekg (InfoHeader.Anchura % 4, std::ios::cur);
 
         }
-        string texto = "Chile continental, onas geográficas. La primera de ellas, Chile continental, comprende una franja en la coss. La primera de ellas, Chile continental, comprende una franja  ";
-        EncryptMessage (Filename, texto);
+        
+        EncryptMessage (Filename, getTexto());
+        cout << "Su texto ha sido Encryptado Correctamente....!" << endl;
+
     }else{
         cout << "*************************************" << endl;
         cout << "Su Texto se esta desencryptando...!" << endl;
@@ -135,7 +137,7 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename,int opcion) {
                 posTexto+=3;
                 if (posTexto>=(Header.Reservado*8)) {
                     DecryptMessage ();
-                    return;
+                   return;
                 }
                 Colores24.push_back (Pixel);
             }
@@ -182,15 +184,15 @@ void Bitmap::Swap_RGB_String_B (string& B, string palabra) {
 }
 
 void Bitmap::EncryptMessage (string path, string texto) {
-  
-    if (((InfoHeader.Altura* InfoHeader.Anchura)/8)<(double)texto.length()) {
+    /*
+    if ((InfoHeader.Anchura*8)<=texto.length()) {
         cout << "No hay suficientes pixeles para representar su mensaje completo" << endl;
         cout << "Elimine: " << (double)texto.length () - ((InfoHeader.Altura * InfoHeader.Anchura) / 8) << " Caracteres" << endl;
         double total_pixels = ((InfoHeader.Altura * InfoHeader.Anchura) / 8) * (double)texto.length ();
         double div1 = ((InfoHeader.Altura * InfoHeader.Anchura) / 8);
         cout << "Se necesita una imagen de " << total_pixels / div1 << " total pixeles para representar su mensaje completamente" << endl;
         return;
-    }
+    }*/
 
     int canT = texto.length ();
     vector<string>cadenas = stringtoBinary (texto);
@@ -264,7 +266,6 @@ void Bitmap::EncryptMessage (string path, string texto) {
             i++;
         }
     }
-    cout << "Su texto ha sido Encryptado Correctamente....!" << endl;
     File2.close ();
 }
 
@@ -283,6 +284,17 @@ void Bitmap::DecryptMessage () {
     }
     cout << "\n";
 
+}
+
+string Bitmap::getTexto () {
+    string cadena;
+    string txt;
+    ifstream a ("test.txt", ios::app);
+    while (!a.eof()) {
+        getline (a, cadena);
+        txt += cadena;
+    }
+    return txt;
 }
 
 void Bitmap::getLastIndex (string data) {
@@ -306,6 +318,7 @@ string Bitmap::getTextFromBinary (string data) {
 
 }
 
+//Fleyd algoritmo de zip
 /*
 bool isBitSet (char ch, int pos) {
     //7 6 5 4 3 2 1 0
