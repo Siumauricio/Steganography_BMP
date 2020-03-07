@@ -121,10 +121,7 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename,string txt,int opcion,int su
                     return;
                 }
             }
-            /*
-            cout << "************************************************" << endl;
-            cout << "Su texto ha sido Encryptado Correctamente....!" << endl;
-            cout << "************************************************" << endl;*/
+
         }else{
             cout<<"Error Este Archivo Posee un Texto!"<<endl;
             return;
@@ -133,10 +130,6 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename,string txt,int opcion,int su
 
     }else if(opcion==2){
         if(Header.Reservado!=0) {
-            /*
-            cout << "*************************************" << endl;
-            cout << "Su Texto se esta desencryptando...!" << endl;
-            cout << "*************************************\n" << endl;*/
             if (subop == 1) {
                 for (int row = 0; row < InfoHeader.Altura; row++) {
                     for (int col = 0; col < InfoHeader.Anchura; col++) {
@@ -220,8 +213,6 @@ void Bitmap::Swap_RGB_String_B (string& B, string palabra) {
 }
 
 void Bitmap::EncryptMessage (string path, string texto) {
-//((InfoHeader.Anchura*InfoHeader.Altura*8)/8)<=texto.length()
-
     if ((texto.length()* 8) > (InfoHeader.Anchura *InfoHeader.Altura)*3) {
         cout<<"EL MENSAJE EXCEDE LO PERMITIDO"<<endl;
         return;
@@ -294,7 +285,6 @@ void Bitmap::EncryptMessage (string path, string texto) {
                 } else {
                     return;
                 }
-                //return;
             }
     }
     File2.close ();
@@ -314,34 +304,16 @@ void Bitmap::DecryptMessage () {
         }
         can += 8;
     }
-    cout << "\n";
-
 }
 
 string Bitmap::getTexto (string nombre) {
-
-
     if(nombre.substr(nombre.find_last_of(".") + 1) == "txt") {
-       // std::cout << "IS TXT" << std::endl;
     } else {
-     //   std::cout << "NO TXT" << std::endl;
         return "VACIO";
     }
     ifstream a ("//home//siumauricio//Escritorio//"+nombre);
 
     std::string content((std::istreambuf_iterator<char>(a)), std::istreambuf_iterator<char>());
-    //cout<<content;
-    /*
-     *     string cadena;
-    string txt;a.seekg(0, std::ios::beg);
-    if(a.fail()){
-        return "VACIO";
-    }
-
-    while (getline (a, cadena)) {
-        txt += cadena ;
-    }
-*/
     a.close();
     return content;
 }
@@ -373,9 +345,3 @@ void Bitmap::EscribirEnArchivo(string filename) {
 double Bitmap::cantidadPalabras() {
     return (int )(InfoHeader.Anchura*InfoHeader.Altura*3)/8;
 }
-
-
-
-
-//Fleyd algoritmo de zip
-/*
