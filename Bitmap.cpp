@@ -115,7 +115,6 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename,string txt,int opcion,int su
 
             }else{
                 if (getTexto(txt)!="VACIO"){
-                    cout<<Colores24.size()<<endl;
                     EncryptMessage (Filename,getTexto(txt));
                     return;
                 }else{
@@ -222,20 +221,15 @@ void Bitmap::Swap_RGB_String_B (string& B, string palabra) {
 
 void Bitmap::EncryptMessage (string path, string texto) {
 //((InfoHeader.Anchura*InfoHeader.Altura*8)/8)<=texto.length()
-/*
+
     if ((texto.length()* 8) > (InfoHeader.Anchura *InfoHeader.Altura)*3) {
-        cout << "No hay suficientes pixeles para representar su mensaje completo" << endl;
-        cout << "Elimine: " << (double)texto.length () - ((InfoHeader.Altura * InfoHeader.Anchura) / 8) << " Caracteres" << endl;
-        double total_pixels = ((InfoHeader.Altura * InfoHeader.Anchura) / 8) * (double)texto.length ();
-        double div1 = ((InfoHeader.Altura * InfoHeader.Anchura) / 8);
-        cout << "Se necesita una imagen de " << total_pixels / div1 << " total pixeles para representar su mensaje completamente" << endl;
+        cout<<"EL MENSAJE EXCEDE LO PERMITIDO"<<endl;
         return;
-    }*/
+    }
 
     int canT = texto.length ();
     vector<string>cadenas = stringtoBinary (texto);
     int contador = 0;
-
 
     int posV = 0;
     ofstream File2 (path, ifstream::in | ifstream::binary);
@@ -385,11 +379,3 @@ double Bitmap::cantidadPalabras() {
 
 //Fleyd algoritmo de zip
 /*
-bool isBitSet (char ch, int pos) {
-    //7 6 5 4 3 2 1 0
-    //0 0 0 0 0 0 0 1
-    ch = ch >> pos;
-    if (ch & 1)
-        return true;
-    return false;
-}*/
