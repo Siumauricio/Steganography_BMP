@@ -14,10 +14,10 @@
 
 Bitmap::Bitmap () {}
 
-Bitmap::Bitmap (string Filename,string txt,int opcion) {
+Bitmap::Bitmap (string Filename,string txt,int opcion, int subopc) {
     string Path="//home//siumauricio//Escritorio//Imagenes//"+Filename;
     ObtenerBmp_Header (Path);
-    ObtenerBmp_InfoHeader (Path,txt,opcion);
+    ObtenerBmp_InfoHeader (Path,txt,opcion,subopc);
 }
 
 void Bitmap::ObtenerBmp_Header (string Filename) {
@@ -41,18 +41,11 @@ void Bitmap::ObtenerBmp_Header (string Filename) {
 
     copy (Header_Posiciones + 10, Header_Posiciones + 14, informacion);
     memcpy (&Header.OffsetData, informacion, 4);
-/*
-    cout << "==== BMP HEADER ====" << endl;
-    cout << "+ Tipo: " << Header.Tipo[0] << Header.Tipo[1] << endl;
-    cout << "+ Tamano Archivo: " << Header.Tamano << endl;
-    cout << "+ Espacio Reservado: " << (Header.Reservado) << endl;
-    cout << "+ DataOffset: " << Header.OffsetData << endl;
-*/
-    cout << endl;
+
     File.close ();
 }
 
-void Bitmap::ObtenerBmp_InfoHeader (string Filename,string txt,int opcion) {
+void Bitmap::ObtenerBmp_InfoHeader (string Filename,string txt,int opcion,int subop) {
     ifstream File;
     File.open (Filename, ifstream::in | ifstream::binary);
     if (File.fail ()) {
@@ -91,58 +84,103 @@ void Bitmap::ObtenerBmp_InfoHeader (string Filename,string txt,int opcion) {
 
     copy (Info_Posiciones + 50, Info_Posiciones + 54, informacion);
     memcpy (&InfoHeader.Colores_Importantes, informacion, 4);
-/*
-    cout << "==== BMP INFOHEADER ====" << endl;
-    cout << "+ Tamano: " << 40 << endl;
-    cout << "+ Anchura: " << InfoHeader.Anchura << endl;
-    cout << "+ Altura: " << InfoHeader.Altura << endl;
-    cout << "+ Planos: " << (int)InfoHeader.Planes[0] << endl;
-    cout << "+ Contador Bits: " << (int)InfoHeader.ContadorBits[0] << endl;
-    cout << "+ Compresion: " << InfoHeader.Compresion << endl;
-    cout << "+ Tamano Imagen: " << InfoHeader.TamanoImagen << endl;
-    cout << "+ Pixel X: " << InfoHeader.Pixeles_X << endl;
-    cout << "+ Pixel Y: " << InfoHeader.Pixeles_Y << endl;
-    cout << "+ Colores U: " << InfoHeader.Colores_Usados << endl;
-    cout << "+ Colores I: " << InfoHeader.Colores_Importantes << endl;*/
     File.seekg (Header.OffsetData, File.beg);
 
-    cout << "\n";
-    if (opcion == 1) {
-        for (int row = 0; row < InfoHeader.Altura; row++) {
-            for (int col = 0; col < InfoHeader.Anchura; col++) {
-                RGB24B  Pixel;
-                File.read (reinterpret_cast<char*>(&Pixel), sizeof (RGB24B));
-                Colores24.push_back (Pixel);
-            }
-            File.seekg (InfoHeader.Anchura % 4, std::ios::cur);
+    if(opcion==4){
+        if((int)InfoHeader.ContadorBits[0]!=24){
+            cout<<"100: Imagen no valida para ocultar el mensaje!"<<endl;
 
+        }if(Header.Reservado!=0){
+           cout<<"101: Imagen ya contiene un mensaje de "<< Header.Reservado<<" caracteres"<<endl;
         }
-
-        EncryptMessage (Filename,txt);
-        cout << "Su texto ha sido Encryptado Correctamente....!" << endl;
-
-    }else{
-        cout << "*************************************" << endl;
-        cout << "Su Texto se esta desencryptando...!" << endl;
-        cout << "*************************************\n\n" << endl;
-
-        for (int row = 0; row < InfoHeader.Altura; row++) {
-            for (int col = 0; col < InfoHeader.Anchura; col++) {
-                RGB24B  Pixel;
-                File.read (reinterpret_cast<char*>(&Pixel), sizeof (RGB24B));
-                getLastIndex (decimaltoBinary ((int)Pixel.r));
-                getLastIndex (decimaltoBinary ((int)Pixel.g));
-                getLastIndex (decimaltoBinary ((int)Pixel.b));
-                posTexto+=3;
-                if (posTexto>=(Header.Reservado*8)) {
-                    DecryptMessage ();
-                   return;
-                }
-                Colores24.push_back (Pixel);
-            }
-            File.seekg (InfoHeader.Anchura % 4, std::ios::cur);
-        }
+        return;
     }
+    if((int)InfoHeader.ContadorBits[0]!=24){
+        cout<<"IMAGEN NO VALIDA!"<<endl;
+        return;
+    }
+
+    if (opcion == 1) {
+        if(Header.Reservado==0) {
+            for (int row = 0; row < InfoHeader.Altura; row++) {
+                for (int col = 0; col < InfoHeader.Anchura; col++) {
+                    RGB24B  Pixel;
+                    File.read (reinterpret_cast<char*>(&Pixel), sizeof (RGB24B));
+                    Colores24.push_back (Pixel);
+                }
+            }
+            if(subop==1){
+                cout<<Colores24.size()<<endl;
+                EncryptMessage (Filename,txt);
+
+            }else{
+                if (getTexto(txt)!="VACIO"){
+                    cout<<Colores24.size()<<endl;
+                    EncryptMessage (Filename,getTexto(txt));
+                    return;
+                }else{
+                    return;
+                }
+            }
+            /*
+            cout << "************************************************" << endl;
+            cout << "Su texto ha sido Encryptado Correctamente....!" << endl;
+            cout << "************************************************" << endl;*/
+        }else{
+            cout<<"Error Este Archivo Posee un Texto!"<<endl;
+            return;
+        }
+
+
+    }else if(opcion==2){
+        if(Header.Reservado!=0) {
+            /*
+            cout << "*************************************" << endl;
+            cout << "Su Texto se esta desencryptando...!" << endl;
+            cout << "*************************************\n" << endl;*/
+            if (subop == 1) {
+                for (int row = 0; row < InfoHeader.Altura; row++) {
+                    for (int col = 0; col < InfoHeader.Anchura; col++) {
+                        RGB24B Pixel;
+                        File.read(reinterpret_cast<char *>(&Pixel), sizeof(RGB24B));
+                        getLastIndex(decimaltoBinary((int) Pixel.r));
+                        getLastIndex(decimaltoBinary((int) Pixel.g));
+                        getLastIndex(decimaltoBinary((int) Pixel.b));
+                        posTexto += 3;
+                        if (posTexto >= (Header.Reservado * 8)) {
+                            pos = 0;
+                            DecryptMessage();
+                            return;
+                        }
+                        Colores24.push_back(Pixel);
+                    }
+                }
+            } else {
+                for (int row = 0; row < InfoHeader.Altura; row++) {
+                    for (int col = 0; col < InfoHeader.Anchura; col++) {
+                        RGB24B Pixel;
+                        File.read(reinterpret_cast<char *>(&Pixel), sizeof(RGB24B));
+                        getLastIndex(decimaltoBinary((int) Pixel.r));
+                        getLastIndex(decimaltoBinary((int) Pixel.g));
+                        getLastIndex(decimaltoBinary((int) Pixel.b));
+                        posTexto += 3;
+                        if (posTexto >= (Header.Reservado * 8)) {
+                            pos = 1;
+                            DecryptMessage();
+                            EscribirEnArchivo(txt);
+                            return;
+                        }
+                        Colores24.push_back(Pixel);
+                    }
+                }
+            }
+        }else {
+            cout<<"LA IMAGEN ESTA VACIA!"<<endl;
+        }
+    } else if (opcion==3){
+        cout<<cantidadPalabras()<<endl;
+    }
+
     File.close ();
 }
 
@@ -168,7 +206,7 @@ vector<string> Bitmap::stringtoBinary (string myString) {
 uint8_t Bitmap::getDecimalFromBinary (string s) {
     std::bitset<sizeof (int) * 8> b (s);
     uint8_t x = b.to_ulong ();
-    return (int)x;
+    return x;
 }
 
 void Bitmap::Swap_RGB_String_R (string& R, string palabra) {
@@ -183,27 +221,29 @@ void Bitmap::Swap_RGB_String_B (string& B, string palabra) {
 }
 
 void Bitmap::EncryptMessage (string path, string texto) {
-
-    if ((InfoHeader.Anchura*8)<=texto.length()) {
+//((InfoHeader.Anchura*InfoHeader.Altura*8)/8)<=texto.length()
+/*
+    if ((texto.length()* 8) > (InfoHeader.Anchura *InfoHeader.Altura)*3) {
         cout << "No hay suficientes pixeles para representar su mensaje completo" << endl;
         cout << "Elimine: " << (double)texto.length () - ((InfoHeader.Altura * InfoHeader.Anchura) / 8) << " Caracteres" << endl;
         double total_pixels = ((InfoHeader.Altura * InfoHeader.Anchura) / 8) * (double)texto.length ();
         double div1 = ((InfoHeader.Altura * InfoHeader.Anchura) / 8);
         cout << "Se necesita una imagen de " << total_pixels / div1 << " total pixeles para representar su mensaje completamente" << endl;
         return;
-    }
+    }*/
 
     int canT = texto.length ();
     vector<string>cadenas = stringtoBinary (texto);
     int contador = 0;
+
+
     int posV = 0;
-    int i = 0;
     ofstream File2 (path, ifstream::in | ifstream::binary);
     File2.seekp (6,File2.beg);
     File2.write (reinterpret_cast<char*>(&canT), 4);
     File2.seekp (Header.OffsetData, File2.beg);
-    for (int row = 0; row < InfoHeader.Altura; row++) {
-        for (int col = 0; col < InfoHeader.Anchura; col++) {
+    for (int i= 0; i < Colores24.size(); ++i) {
+
             string R = decimaltoBinary ((int)Colores24[i].r);
             string G = decimaltoBinary ((int)Colores24[i].g);
             string B = decimaltoBinary ((int)Colores24[i].b);
@@ -262,8 +302,6 @@ void Bitmap::EncryptMessage (string path, string texto) {
                 }
                 //return;
             }
-            i++;
-        }
     }
     File2.close ();
 }
@@ -273,11 +311,12 @@ void Bitmap::DecryptMessage () {
     for (int i = 8; i < Cadena.size (); i += 8) {
         string a (&Cadena[can], &Cadena[i]);
         string texto = getTextFromBinary (a);
-        if (texto[0] == '#') {
-           return;
-        }
         for (int j = 0; j < a.length () - 7; j++) {
-            cout << texto[j];
+            if(pos==0){
+                cout <<(char) texto[j];
+            }else{
+                txtArchivo+=texto[j];
+            }
         }
         can += 8;
     }
@@ -285,15 +324,32 @@ void Bitmap::DecryptMessage () {
 
 }
 
-string Bitmap::getTexto () {
-    string cadena;
-    string txt;
-    ifstream a ("//home//siumauricio//Escritorio//test.txt", ios::app);
-    while (!a.eof()) {
-        getline (a, cadena);
-        txt += cadena;
+string Bitmap::getTexto (string nombre) {
+
+
+    if(nombre.substr(nombre.find_last_of(".") + 1) == "txt") {
+       // std::cout << "IS TXT" << std::endl;
+    } else {
+     //   std::cout << "NO TXT" << std::endl;
+        return "VACIO";
     }
-    return txt;
+    ifstream a ("//home//siumauricio//Escritorio//"+nombre);
+
+    std::string content((std::istreambuf_iterator<char>(a)), std::istreambuf_iterator<char>());
+    //cout<<content;
+    /*
+     *     string cadena;
+    string txt;a.seekg(0, std::ios::beg);
+    if(a.fail()){
+        return "VACIO";
+    }
+
+    while (getline (a, cadena)) {
+        txt += cadena ;
+    }
+*/
+    a.close();
+    return content;
 }
 
 void Bitmap::getLastIndex (string data) {
@@ -309,13 +365,23 @@ string Bitmap::getTextFromBinary (string data) {
         sstream >> bits;
         char c = char (bits.to_ulong ());
         output += c;
-
-
     }
-
     return output;
-
 }
+
+void Bitmap::EscribirEnArchivo(string filename) {
+    ofstream myfile;
+    myfile.open (filename);
+    myfile << txtArchivo;
+    myfile.close();
+}
+
+double Bitmap::cantidadPalabras() {
+    return (int )(InfoHeader.Anchura*InfoHeader.Altura*3)/8;
+}
+
+
+
 
 //Fleyd algoritmo de zip
 /*
