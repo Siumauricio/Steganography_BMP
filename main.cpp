@@ -11,7 +11,6 @@ int main (int argc,char ** argv) {
             if (word2 == "-m") {
                 for (int j = 4; j < argc; ++j) {
                     palabra += argv[j];
-                    palabra += " ";
                 }
                 Bitmap bmp(argv[2], palabra, 1, 1);
             } else if (word2 == "-f") {
@@ -37,5 +36,6 @@ int main (int argc,char ** argv) {
             Bitmap bmp(argv[2], "", 4, 1);
         }
     }
+    cout<<endl;
     return 0;
 }
